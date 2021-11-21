@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"lectures-6/internal/models"
-	"lectures-6/internal/store"
+	"go/internal/models"
+	"go/internal/store"
 	"log"
 	"net/http"
 	"strconv"
@@ -47,10 +47,10 @@ func (s *Server) basicHandler() chi.Router {
 			return
 		}
 
-		s.store.Create(r.Context(), order)
+		s.store.Order().Create(r.Context(), order)
 	})
 	r.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
-		orders, err := s.store.All(r.Context())
+		orders, err := s.store.Order().All(r.Context())
 		if err != nil {
 			fmt.Fprintf(w, "Unknown err: %v", err)
 			return
@@ -66,7 +66,7 @@ func (s *Server) basicHandler() chi.Router {
 			return
 		}
 
-		order, err := s.store.ByID(r.Context(), id)
+		order, err := s.store.Order().ByID(r.Context(), id)
 		if err != nil {
 			fmt.Fprintf(w, "Unknown err: %v", err)
 			return
@@ -81,7 +81,7 @@ func (s *Server) basicHandler() chi.Router {
 			return
 		}
 
-		s.store.Update(r.Context(), order)
+		s.store.Order().Update(r.Context(), order)
 	})
 	r.Delete("/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
@@ -91,7 +91,115 @@ func (s *Server) basicHandler() chi.Router {
 			return
 		}
 
-		s.store.Delete(r.Context(), id)
+		s.store.Order().Delete(r.Context(), id)
+	})
+
+	r.Post("/restaurants", func(w http.ResponseWriter, r *http.Request) {
+		res := new(models.Restaurant)
+		if err := json.NewDecoder(r.Body).Decode(res); err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Restaurant().Create(r.Context(), res)
+	})
+	r.Get("/restaurants", func(w http.ResponseWriter, r *http.Request) {
+		restaurants, err := s.store.Restaurant().All(r.Context())
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		render.JSON(w, r, restaurants)
+	})
+	r.Get("/restaurants/{id}", func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		restaurant, err := s.store.Restaurant().ByID(r.Context(), id)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		render.JSON(w, r, restaurant)
+	})
+	r.Put("/restaurants", func(w http.ResponseWriter, r *http.Request) {
+		restaurant := new(models.Restaurant)
+		if err := json.NewDecoder(r.Body).Decode(restaurant); err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Restaurant().Update(r.Context(), restaurant)
+	})
+	r.Delete("/rerstaurants/{id}", func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Restaurant().Delete(r.Context(), id)
+	})
+
+	r.Post("/categories", func(w http.ResponseWriter, r *http.Request) {
+		categorie := new(models.Category)
+		if err := json.NewDecoder(r.Body).Decode(categorie); err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Categories().Create(r.Context(), categorie)
+	})
+	r.Get("/categories", func(w http.ResponseWriter, r *http.Request) {
+		categories, err := s.store.Categories().All(r.Context())
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		render.JSON(w, r, categories)
+	})
+	r.Get("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		categorie, err := s.store.Categories().ByID(r.Context(), id)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		render.JSON(w, r, categorie)
+	})
+	r.Put("/categories", func(w http.ResponseWriter, r *http.Request) {
+		categorie := new(models.Category)
+		if err := json.NewDecoder(r.Body).Decode(categorie); err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Categories().Update(r.Context(), categorie)
+	})
+	r.Delete("/categories/{id}", func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			fmt.Fprintf(w, "Unknown err: %v", err)
+			return
+		}
+
+		s.store.Categories().Delete(r.Context(), id)
 	})
 
 	return r

@@ -2,17 +2,21 @@ package main
 
 import (
 	"context"
-	"lectures-6/internal/http"
-	"lectures-6/internal/store/inmemory"
-	"log"
+	"go/internal/http"
+	"go/internal/store/postgres"
 )
 
 func main() {
-	store := inmemory.NewDB()
+	urlExample := "postgres://localhost:5431/mina"
+	store := postgres.NewDB()
+	if err := store.Connect(urlExample); err != nil {
+		panic(err)
+	}
+	defer store.Close()
 
 	srv := http.NewServer(context.Background(), ":8080", store)
 	if err := srv.Run(); err != nil {
-		log.Println(err)
+		panic(err)
 	}
 
 	srv.WaitForGracefulTermination()
